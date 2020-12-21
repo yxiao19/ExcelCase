@@ -1,0 +1,333 @@
+---
+title: "Excel Inc Case"
+author: "Group A - In Person MSMA"
+date: "12/3/2020"
+output: html_document
+---
+
+### Caculated distance between home and venue
+```{r}
+df <- read.csv("C:/Users/hbjzx/Desktop/SIMON/FALL B/SQL/HW2/location.csv")
+str(df)
+
+df$Category_Frequent <- ifelse(df$Category_Frequent == "Frequent", "Y","N")
+df$Category_Loyal <- ifelse(df$Category_Loyal == "Loyal","Y","N")
+
+my_dist <- function(long1, lat1, long2, lat2) {
+    rad <- pi/180
+    a1 <- lat1*rad
+    a2 <- long1*rad
+    b1 <- lat2*rad
+    b2 <- long2*rad
+    dlon <- b2 - a2
+    dlat <- b1 - a1
+    a <- (sin(dlat/2))^2 + cos(a1)*cos(b1)*(sin(dlon/2))^2
+    if(sqrt(a)>0 & sqrt(1-a)>0){
+        c<- 2*atan(sqrt(a)/sqrt(1 - a))
+    } else {
+        c <- 2*atan2(sqrt(a), sqrt(1 - a))
+    }
+    R <- 6371/1.6 
+    d <- R*c
+    return(d)
+}
+
+df$distance <- my_dist(df$user_longitude, df$user_latitude, df$chain_longitude, df$chain_latitude)
+df$closeTohome <- ifelse(df$distance <5,"Y",'N')
+
+# write.csv(df,"C:/Users/hbjzx/Desktop/SIMON/FALL B/SQL/HW2/closetohome.csv", row.names = FALSE)
+```
+
+
+### Create cross shopper data
+```{r}
+crossshopper <- read.csv("C:/Users/hbjzx/Desktop/SIMON/FALL B/SQL/HW2/crossshopper.csv")
+df_A <- crossshopper[crossshopper$chain == "AbleWare",] #find shopper who shop at AbleWare, they are AbleWare's customers
+head(df_A)
+#A Retailer
+A1 <- merge(df_A, crossshopper, by = c("userID")) #find out AbleWare's customers' visits to other chains
+A1_new <- subset(A1,, select = c(userID, chain.y,numVisits.y )) #organize data
+sum(A1_new$numVisits.y) #total visits by AbleWare's customers
+
+AA <-  sum(A1_new[A1_new$chain.y =="AbleWare",]$numVisits.y) #number of visits to AbleWare by AbleWare's customers
+AA
+#AB
+AB <-  sum(A1_new[A1_new$chain.y =="BuildInc",]$numVisits.y) #number of visits to BuildInc by AbleWare's customers
+AB
+#AC
+AC <- sum(A1_new[A1_new$chain.y =="Collards",]$numVisits.y)#number of visits to Collards by AbleWare's customers
+AC
+#AD
+AD <-  sum(A1_new[A1_new$chain.y =="DepotInc",]$numVisits.y) #number of visits to DepotInc by AbleWare's customers
+AD
+#AE
+AE<-  sum(A1_new[A1_new$chain.y =="ExcelInc",]$numVisits.y) #number of visits to Excel Inc by AbleWare's customers
+AE
+
+#B retailer
+df_B <- crossshopper[crossshopper$chain == "BuildInc",]
+B1 <- merge(df_B, crossshopper, by = c("userID"))
+#BA
+B1_new <- subset(B1,, select = c(userID, chain.y,numVisits.y ))
+totalB <- sum(B1_new$numVisits.y)
+BA <-  sum(B1_new[B1_new$chain.y=='AbleWare',]$numVisits.y)
+BA
+BA/totalB
+#BB
+BB <-  sum(B1_new[B1_new$chain.y=='BuildInc',]$numVisits.y)
+BB
+BB/totalB
+#BC
+BC <-  sum(B1_new[B1_new$chain.y=='Collards',]$numVisits.y)
+BC
+BC/totalB
+#BD
+BD <-  sum(B1_new[B1_new$chain.y=='DepotInc',]$numVisits.y)
+BD
+BD/totalB
+#BE
+BE <-  sum(B1_new[B1_new$chain.y=='ExcelInc',]$numVisits.y)
+BE
+BE/totalB
+
+#C Retailer
+df_C <- crossshopper[crossshopper$chain == "Collards",]
+C1 <- merge(df_C, crossshopper, by = c("userID"))
+C1_new <- subset(C1,, select = c(userID, chain.y,numVisits.y ))
+sum(C1_new$numVisits.y)
+#CA
+CA <-  sum(C1_new[C1_new$chain.y =="AbleWare",]$numVisits.y)
+CA
+#CB
+CB <-  sum(C1_new[C1_new$chain.y =="BuildInc",]$numVisits.y)
+CB
+#CC
+CC <-  sum(C1_new[C1_new$chain.y =="Collards",]$numVisits.y)
+CC
+#CD
+CD <-  sum(C1_new[C1_new$chain.y =="DepotInc",]$numVisits.y)
+CD
+#CE
+CE <-  sum(C1_new[C1_new$chain.y =="ExcelInc",]$numVisits.y)
+CE
+
+#D retailer
+df_D <- crossshopper[crossshopper$chain == "DepotInc",]
+D1 <- merge(df_D, crossshopper, by = c("userID"))
+#BA
+D1_new <- subset(D1,, select = c(userID, chain.y,numVisits.y ))
+totalD <- sum(D1_new$numVisits.y)
+DA <-  sum(D1_new[D1_new$chain.y=='AbleWare',]$numVisits.y)
+DA
+DA/totalD
+#AB
+DB <-  sum(D1_new[D1_new$chain.y=='BuildInc',]$numVisits.y)
+DB
+DB/totalD
+#BC
+DC <-  sum(D1_new[D1_new$chain.y=='Collards',]$numVisits.y)
+DC
+DC/totalD
+#BD
+DD <-  sum(D1_new[D1_new$chain.y=='DepotInc',]$numVisits.y)
+DD
+DD/totalD
+#BE
+DE <-  sum(D1_new[D1_new$chain.y=='ExcelInc',]$numVisits.y)
+DE
+DE/totalD
+
+#E Retailer
+df_E <- crossshopper[crossshopper$chain == "ExcelInc",]
+E1 <- merge(df_E, crossshopper, by = c("userID"))
+E1_new <- subset(E1,, select = c(userID, chain.y,numVisits.y ))
+sum(E1_new$numVisits.y)
+#EA
+EA <-  sum(E1_new[E1_new$chain.y =="AbleWare",]$numVisits.y)
+EA
+#EB
+EB <-  sum(E1_new[E1_new$chain.y =="BuildInc",]$numVisits.y)
+EB
+#EC
+EC <-  sum(E1_new[E1_new$chain.y =="Collards",]$numVisits.y)
+EC
+#ED
+ED <-  sum(E1_new[E1_new$chain.y =="DepotInc",]$numVisits.y)
+ED
+#EE
+EE <-  sum(E1_new[E1_new$chain.y =="ExcelInc",]$numVisits.y)
+EE
+```
+
+
+### Segment cross shopper by loyal 
+```{r}
+#Loyal & Not Loyal
+crossshopperloyal <- crossshopper[crossshopper$Category_Loyal=='Loyal',] #find customers who are loyal
+crossshoppernotloyal <- crossshopper[crossshopper$Category_Loyal!='Loyal',] #find customers who are not loyal
+df_A <- crossshopper[crossshopper$chain == "AbleWare",] # All Ableware customers
+df_A_loyal <- crossshopperloyal[crossshopperloyal$chain == "AbleWare",] #Ableware loyal customers
+df_A_notloyal <- crossshoppernotloyal[crossshoppernotloyal$chain == "AbleWare",] #Ableware not loyal customers
+head(df_A)
+#AA Loyal
+crossshopperloyal <- crossshopper[crossshopper$Category_Loyal=='Loyal',]
+crossshoppernotloyal <- crossshopper[crossshopper$Category_Loyal!='Loyal',]
+df_A <- crossshopper[crossshopper$chain == "AbleWare",]
+df_A_loyal <- crossshopperloyal[crossshopperloyal$chain == "AbleWare",]
+df_A_notloyal <- crossshoppernotloyal[crossshoppernotloyal$chain == "AbleWare",]
+head(df_A)
+#AA
+A1 <- merge(df_A, crossshopper, by = c("userID"))
+A1_new <- subset(A1,, select = c(userID, chain.y,numVisits.y ))
+totalA <- sum(A1_new$numVisits.y)
+AA <-  sum(A1_new[A1_new$chain.y=='AbleWare',]$numVisits.y)
+AA
+AA/totalA
+
+A1_loyal <- merge(df_A_loyal, crossshopperloyal, by = c("userID"))
+A1_new_loyal <- subset(A1_loyal,, select = c(userID, chain.y,numVisits.y ))
+totalA_loyal <- sum(A1_new_loyal$numVisits.y)
+AA_loyal <-  sum(A1_new_loyal[A1_new_loyal$chain.y=='AbleWare',]$numVisits.y)
+AA_loyal
+AA_loyal/AA
+
+crossshopperloyal <- crossshopper[crossshopper$Category_Loyal=='Loyal',]
+crossshoppernotloyal <- crossshopper[crossshopper$Category_Loyal!='Loyal',]
+df_C <- crossshopper[crossshopper$chain == "Collards",]
+df_C_loyal <- crossshopperloyal[crossshopperloyal$chain == "Collards",]
+df_C_notloyal <- crossshoppernotloyal[crossshoppernotloyal$chain == "Collards",]
+head(df_C)
+#CC Loyal
+crossshopperloyal <- crossshopper[crossshopper$Category_Loyal=='Loyal',]
+crossshoppernotloyal <- crossshopper[crossshopper$Category_Loyal!='Loyal',]
+df_C <- crossshopper[crossshopper$chain == "Collards",]
+df_C_loyal <- crossshopperloyal[crossshopperloyal$chain == "Collards",]
+df_C_notloyal <- crossshoppernotloyal[crossshoppernotloyal$chain == "Collards",]
+head(df_C)
+#CC
+C1 <- merge(df_C, crossshopper, by = c("userID"))
+C1_new <- subset(C1,, select = c(userID, chain.y,numVisits.y ))
+totalC <- sum(C1_new$numVisits.y)
+CC <-  sum(C1_new[C1_new$chain.y=='Collards',]$numVisits.y)
+CC
+CC/totalC
+
+C1_loyal <- merge(df_C_loyal, crossshopperloyal, by = c("userID"))
+C1_new_loyal <- subset(C1_loyal,, select = c(userID, chain.y,numVisits.y ))
+totalC_loyal <- sum(C1_new_loyal$numVisits.y)
+CC_loyal <-  sum(C1_new_loyal[C1_new_loyal$chain.y=='Collards',]$numVisits.y)
+CC_notloyal <- merge(df_C_notloyal, crossshoppernotloyal, by = c("userID"))
+
+C1_new_notloyal <- subset(CC_notloyal,, select = c(userID, chain.y,numVisits.y ))
+CC_not_loyal <-  sum(C1_new_notloyal[C1_new_notloyal$chain.y=='Collards',]$numVisits.y)
+CC_not_loyal
+CC_loyal
+CC_loyal/CC
+
+
+#EE
+crossshopperloyal <- crossshopper[crossshopper$Category_Loyal=='Loyal',]
+crossshoppernotloyal <- crossshopper[crossshopper$Category_Loyal!='Loyal',]
+df_E <- crossshopper[crossshopper$chain == "ExcelInc",]
+df_E_loyal <- crossshopperloyal[crossshopperloyal$chain == "ExcelInc",]
+df_E_notloyal <- crossshoppernotloyal[crossshoppernotloyal$chain == "ExcelInc",]
+head(df_E)
+#EE Loyal
+crossshopperloyal <- crossshopper[crossshopper$Category_Loyal=='Loyal',]
+crossshoppernotloyal <- crossshopper[crossshopper$Category_Loyal!='Loyal',]
+df_E <- crossshopper[crossshopper$chain == "ExcelInc",]
+df_E_loyal <- crossshopperloyal[crossshopperloyal$chain == "ExcelInc",]
+df_E_notloyal <- crossshoppernotloyal[crossshoppernotloyal$chain == "ExcelInc",]
+head(df_E)
+#EE
+E1 <- merge(df_E, crossshopper, by = c("userID"))
+E1_new <- subset(E1,, select = c(userID, chain.y,numVisits.y ))
+totalE <- sum(E1_new$numVisits.y)
+EE <-  sum(E1_new[E1_new$chain.y=='ExcelInc',]$numVisits.y)
+EE
+EE/totalE
+
+E1_loyal <- merge(df_E_loyal, crossshopperloyal, by = c("userID"))
+E1_new_loyal <- subset(E1_loyal,, select = c(userID, chain.y,numVisits.y ))
+totalE_loyal <- sum(E1_new_loyal$numVisits.y)
+EE_loyal <-  sum(E1_new_loyal[E1_new_loyal$chain.y=='ExcelInc',]$numVisits.y)
+EE_notloyal <- merge(df_E_notloyal, crossshoppernotloyal, by = c("userID"))
+
+E1_new_notloyal <- subset(EE_notloyal,, select = c(userID, chain.y,numVisits.y ))
+EE_not_loyal <-  sum(E1_new_notloyal[E1_new_notloyal$chain.y=='ExcelInc',]$numVisits.y)
+EE_not_loyal
+EE_loyal
+EE_loyal/EE
+
+#BB
+crossshopperloyal <- crossshopper[crossshopper$Category_Loyal=='Loyal',]
+crossshoppernotloyal <- crossshopper[crossshopper$Category_Loyal!='Loyal',]
+df_B <- crossshopper[crossshopper$chain == "BuildInc",]
+df_B_loyal <- crossshopperloyal[crossshopperloyal$chain == "BuildInc",]
+df_B_notloyal <- crossshoppernotloyal[crossshoppernotloyal$chain == "BuildInc",]
+head(df_B)
+#BB Loyal
+crossshopperloyal <- crossshopper[crossshopper$Category_Loyal=='Loyal',]
+crossshoppernotloyal <- crossshopper[crossshopper$Category_Loyal!='Loyal',]
+df_B <- crossshopper[crossshopper$chain == "BuildInc",]
+df_B_loyal <- crossshopperloyal[crossshopperloyal$chain == "BuildInc",]
+df_B_notloyal <- crossshoppernotloyal[crossshoppernotloyal$chain == "BuildInc",]
+head(df_B)
+#BB
+B1 <- merge(df_B, crossshopper, by = c("userID"))
+B1_new <- subset(B1,, select = c(userID, chain.y,numVisits.y ))
+totalB <- sum(B1_new$numVisits.y)
+BB <-  sum(B1_new[B1_new$chain.y=='BuildInc',]$numVisits.y)
+BB
+BB/totalB
+
+B1_loyal <- merge(df_B_loyal, crossshopperloyal, by = c("userID"))
+B1_new_loyal <- subset(B1_loyal,, select = c(userID, chain.y,numVisits.y ))
+totalB_loyal <- sum(B1_new_loyal$numVisits.y)
+BB_loyal <-  sum(B1_new_loyal[B1_new_loyal$chain.y=='BuildInc',]$numVisits.y)
+BB_notloyal <- merge(df_B_notloyal, crossshoppernotloyal, by = c("userID"))
+
+B1_new_notloyal <- subset(BB_notloyal,, select = c(userID, chain.y,numVisits.y ))
+BB_not_loyal <-  sum(B1_new_notloyal[B1_new_notloyal$chain.y=='BuildInc',]$numVisits.y)
+BB_not_loyal
+BB_loyal
+BB_loyal/BB
+
+
+
+
+#DD
+crossshopperloyal <- crossshopper[crossshopper$Category_Loyal=='Loyal',]
+crossshoppernotloyal <- crossshopper[crossshopper$Category_Loyal!='Loyal',]
+df_D <- crossshopper[crossshopper$chain == "DepotInc",]
+df_D_loyal <- crossshopperloyal[crossshopperloyal$chain == "DepotInc",]
+df_D_notloyal <- crossshoppernotloyal[crossshoppernotloyal$chain == "DepotInc",]
+head(df_D)
+#DD Loyal
+crossshopperloyal <- crossshopper[crossshopper$Category_Loyal=='Loyal',]
+crossshoppernotloyal <- crossshopper[crossshopper$Category_Loyal!='Loyal',]
+df_D <- crossshopper[crossshopper$chain == "DepotInc",]
+df_D_loyal <- crossshopperloyal[crossshopperloyal$chain == "DepotInc",]
+df_D_notloyal <- crossshoppernotloyal[crossshoppernotloyal$chain == "DepotInc",]
+head(df_D)
+#DD
+D1 <- merge(df_D, crossshopper, by = c("userID"))
+D1_new <- subset(D1,, select = c(userID, chain.y,numVisits.y ))
+totalD <- sum(D1_new$numVisits.y)
+DD <-  sum(D1_new[D1_new$chain.y=='DepotInc',]$numVisits.y)
+DD
+DD/totalD
+
+D1_loyal <- merge(df_D_loyal, crossshopperloyal, by = c("userID"))
+D1_new_loyal <- subset(D1_loyal,, select = c(userID, chain.y,numVisits.y ))
+totalD_loyal <- sum(D1_new_loyal$numVisits.y)
+DD_loyal <-  sum(D1_new_loyal[D1_new_loyal$chain.y=='DepotInc',]$numVisits.y)
+DD_notloyal <- merge(df_D_notloyal, crossshoppernotloyal, by = c("userID"))
+
+D1_new_notloyal <- subset(DD_notloyal,, select = c(userID, chain.y,numVisits.y ))
+DD_not_loyal <-  sum(D1_new_notloyal[D1_new_notloyal$chain.y=='DepotInc',]$numVisits.y)
+DD_not_loyal
+DD_loyal
+DD_loyal/DD
+```
+
